@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg:       #f2efe8;
@@ -27,11 +27,11 @@
   --red:      #9b2515;
   --green:    #1e5c38;
   --blue:     #1a4a72;
-  --font:     'Courier Prime', 'Courier New', monospace;
+  --font:     'Merriweather', Georgia, serif;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 19px; }
+html { font-size: 16px; }
 body {
   font-family: var(--font);
   background: var(--bg);
@@ -179,8 +179,9 @@ body {
   gap: 12px; margin-bottom: 16px; flex-wrap: wrap;
 }
 .gun-baslik-tarih {
-  font-size: 22px; font-weight: 700; color: var(--text);
-  font-style: italic; letter-spacing: -0.5px;
+  font-size: 22px; font-weight: 700; color: var(--text3);
+  font-family: 'Playfair Display', Georgia, serif;
+  letter-spacing: -0.5px;
 }
 .analiz2-btn {
   font-family: var(--font); font-size: 10px; letter-spacing: 2px;
@@ -575,7 +576,7 @@ mark { background: var(--gold3); color: var(--bg); padding: 0 1px; }
           <option value="aksam">akşam</option>
         </select>
       </div>
-      <input type="text" class="def-input" id="yeniEtiketler" placeholder="etiketler: iş, yağmur, kahve">
+
       <textarea class="def-textarea" id="yeniIcerik" rows="5"></textarea>
       <div class="editor-alt">
         <button class="btn-taslak-sil" id="taslakSilBtn" onclick="taslakSil()" style="display:none">taslağı sil</button>
@@ -671,7 +672,7 @@ const BESLENMELER= [
 ];
 const ZAMAN_TR   = {sabah:'sabah',oglen:'öğlen',aksam:'akşam'};
 const KAT_AD     = {gunluk:'günlük',ruya:'rüya',ilginc:'ilginç'};
-const KAT_PH     = {gunluk:'bugün ne yaşadın_',ruya:'rüyanda ne gördün_',ilginc:'bugünün ilginç anı_'};
+const KAT_PH     = {gunluk:'bugün neler oldu, ne hissettin?',ruya:'rüyanda ne gördün?',ilginc:'bugün ilginç bir şey oldu mu?'};
 const UYKU_YATIS = ['erken','normal','geç'];
 const OGUN_TIPLER= ['kahvaltı','öğle','akşam','ara öğün'];
 const OGUN_YERI  = ['evde','dışarıda'];
@@ -832,7 +833,7 @@ function taslakNoktalariniGuncelle(){
   document.getElementById('taslakSilBtn').style.display=dolu?'inline-block':'none';
 }
 function sekmeAc(kat){
-  if(sonGunData)taslaklarLokal[aktifSekme]={icerik:document.getElementById('yeniIcerik').value,etiketler:document.getElementById('yeniEtiketler').value,zaman:document.getElementById('zamanSec').value};
+  if(sonGunData)taslaklarLokal[aktifSekme]={icerik:document.getElementById('yeniIcerik').value,etiketler:(document.getElementById('yeniEtiketler')||{value:''}).value,zaman:document.getElementById('zamanSec').value};
   aktifSekme=kat; localStorage.setItem('aktifSekme',kat);
   document.querySelectorAll('.sekme-btn').forEach(b=>b.classList.remove('aktif'));
   document.getElementById(`sekmeBtn-${kat}`).classList.add('aktif');
@@ -840,7 +841,7 @@ function sekmeAc(kat){
   document.getElementById('yeniIcerik').placeholder=KAT_PH[kat];
   const t=taslaklarLokal[kat]||{};
   document.getElementById('yeniIcerik').value=t.icerik||'';
-  document.getElementById('yeniEtiketler').value=t.etiketler||'';
+  (document.getElementById('yeniEtiketler')||{value:''}).value=t.etiketler||'';
   document.getElementById('zamanSec').value=t.zaman||'';
   if(sonGunData)notlariCiz(sonGunData);
   taslakNoktalariniGuncelle();
@@ -849,7 +850,7 @@ function taslakKaydetGec(){
   clearTimeout(taslakTimer);
   taslakTimer=setTimeout(async()=>{
     const ic=document.getElementById('yeniIcerik').value;
-    const et=document.getElementById('yeniEtiketler').value;
+    const et=(document.getElementById('yeniEtiketler')||{value:''}).value;
     const zm=document.getElementById('zamanSec').value;
     taslaklarLokal[aktifSekme]={icerik:ic,etiketler:et,zaman:zm};
     await IDB.put('taslaklar',{tarih:seciliTarih,kategori:aktifSekme,icerik:ic,etiketler:et.split(',').map(s=>s.trim()).filter(Boolean),zaman:zm});
@@ -863,7 +864,7 @@ document.getElementById('yeniEtiketler').addEventListener('input',taslakKaydetGe
 document.getElementById('zamanSec').addEventListener('change',taslakKaydetGec);
 async function taslakSil(){
   if(!confirm('Taslak silinsin mi?'))return;
-  document.getElementById('yeniIcerik').value=''; document.getElementById('yeniEtiketler').value=''; document.getElementById('zamanSec').value='';
+  document.getElementById('yeniIcerik').value=''; (document.getElementById('yeniEtiketler')||{value:''}).value=''; document.getElementById('zamanSec').value='';
   taslaklarLokal[aktifSekme]={icerik:'',etiketler:'',zaman:''};
   await IDB.put('taslaklar',{tarih:seciliTarih,kategori:aktifSekme,icerik:'',etiketler:[],zaman:''});
   taslakNoktalariniGuncelle();
@@ -898,7 +899,7 @@ async function gunYukle(tarih){
   taslaklarLokal=r.taslaklar;
   const t=taslaklarLokal[aktifSekme]||{};
   document.getElementById('yeniIcerik').value=t.icerik||'';
-  document.getElementById('yeniEtiketler').value=t.etiketler||'';
+  (document.getElementById('yeniEtiketler')||{value:''}).value=t.etiketler||'';
   document.getElementById('zamanSec').value=t.zaman||'';
   notlariCiz(r); taslakNoktalariniGuncelle();
   gv=r.gun_verileri; if(!gv)gv={uyku:{},ogunler:[],icecek:{},spor:{},saglik:{},ekran:{},sosyal:{}};
@@ -906,9 +907,9 @@ async function gunYukle(tarih){
 }
 async function notKaydet(){
   const ic=document.getElementById('yeniIcerik').value.trim(); if(!ic)return;
-  const et=document.getElementById('yeniEtiketler').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const et=(document.getElementById('yeniEtiketler')||{value:''}).value.split(',').map(s=>s.trim()).filter(Boolean);
   await IDB.put('notlar',{tarih:seciliTarih,kategori:aktifSekme,icerik:ic,etiketler:et,zaman:document.getElementById('zamanSec').value||null,olusturulma:new Date().toISOString()});
-  document.getElementById('yeniIcerik').value=''; document.getElementById('yeniEtiketler').value=''; document.getElementById('zamanSec').value='';
+  document.getElementById('yeniIcerik').value=''; (document.getElementById('yeniEtiketler')||{value:''}).value=''; document.getElementById('zamanSec').value='';
   taslaklarLokal[aktifSekme]={icerik:'',etiketler:'',zaman:''};
   await IDB.put('taslaklar',{tarih:seciliTarih,kategori:aktifSekme,icerik:'',etiketler:[],zaman:''});
   taslakNoktalariniGuncelle(); gunYukle(seciliTarih); tumGunleriYukle(); etiketleriYukle();
