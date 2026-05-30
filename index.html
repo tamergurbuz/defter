@@ -873,7 +873,7 @@ function notlariCiz(data){
   if(!filtre.length){liste.innerHTML=`<div style="font-size:11px;color:var(--text3);padding:12px 0;font-style:italic">bu gün için ${KAT_AD[aktifSekme]} kaydı yok_</div>`;return;}
   liste.innerHTML=filtre.map(n=>{
     const zamanRozetler=(n.zamanlar||[]).map(z=>`<span class="not-zaman">${ZAMAN_TR[z]||z}</span>`).join('');
-    const icerikVurgulu=esc(n.icerik).replace(/\b(sabah|öğlen|akşam|gece)\s*,/gi,'<span style="color:var(--gold3);font-weight:700">$1,</span>');
+    const icerikVurgulu=esc(n.icerik).replace(/(sabah|öğlen|oglen|öğle|akşam|aksam|gece)(\s*,)/gi,'<span style="color:var(--gold3);font-weight:700">$1$2</span>');
     return `<div class="not-kart ${n.kategori}">
       <button class="not-sil" onclick="notSil(${n.id})">[ sil ]</button>
       <div class="not-meta">
@@ -906,13 +906,23 @@ async function gunYukle(tarih){
   if(!gv.ogunler)gv.ogunler=[]; gvCiz(); takvimCiz();
 }
 function zamanParseEt(metin){
-  // sabah, / öğlen, / akşam, / gece, ile başlayan bölümleri bul
   const zamanlar=[];
-  const re=/\b(sabah|öğlen|oglen|akşam|aksam|gece)\s*,/gi;
-  let m;
-  while((m=re.exec(metin))!==null){
-    const z=m[1].toLowerCase().replace('öğlen','oglen').replace('akşam','aksam');
-    if(!zamanlar.includes(z))zamanlar.push(z);
+  // Her zaman kelimesini ayrı ara - Türkçe  sorunu nedeniyle
+  const eslesler=[
+    {re:/(^|[\s\n])(sabah)\s*,/gi, z:'sabah'},
+    {re:/(^|[\s\n])(öğlen|oglen|öğle|ogle)\s*,/gi, z:'oglen'},
+    {re:/(^|[\s\n])(akşam|aksam)\s*,/gi, z:'aksam'},
+    {re:/(^|[\s\n])(gece)\s*,/gi, z:'gece'},
+  ];
+  // Satır başında da yakala (ilk kelime olabilir)
+  const ilk=metin.trimStart().split(/[\s,]/)[0].toLowerCase();
+  if(ilk==='sabah')zamanlar.push('sabah');
+  else if(ilk==='öğlen'||ilk==='oglen'||ilk==='öğle')zamanlar.push('oglen');
+  else if(ilk==='akşam'||ilk==='aksam')zamanlar.push('aksam');
+  else if(ilk==='gece')zamanlar.push('gece');
+  
+  for(const {re,z} of eslesler){
+    if(re.test(metin)&&!zamanlar.includes(z))zamanlar.push(z);
   }
   return zamanlar;
 }
