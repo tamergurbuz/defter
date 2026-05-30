@@ -501,6 +501,7 @@ mark { background: var(--gold3); color: var(--bg); padding: 0 1px; }
     <div class="logo">def<span>kişisel kayıt</span></div>
     <input id="aramaInput" type="search" placeholder="ara_">
     <div class="hdr-spacer"></div>
+    <button class="hdr-btn" onclick="document.getElementById('hakkindaModal').classList.remove('hidden')" title="hakkında">?</button>
     <button class="hdr-btn" onclick="disaAktar()">↓ yedek</button>
     <button class="hdr-btn" onclick="document.getElementById('iceAktarInput').click()">↑ yükle</button>
     <input id="iceAktarInput" type="file" accept=".json" class="hidden" style="display:none" onchange="iceAktar(event)">
@@ -591,6 +592,33 @@ mark { background: var(--gold3); color: var(--bg); padding: 0 1px; }
     <div id="gvAcc"></div>
   </div>
 
+</div>
+
+
+<!-- HAKKINDA MODALİ -->
+<div class="modal-overlay hidden" id="hakkindaModal">
+  <div class="modal-kasa" style="max-width:560px">
+    <div class="modal-header">
+      <div class="modal-baslik">def — kişisel kayıt ve örüntü analizi</div>
+      <button class="modal-kapat" onclick="document.getElementById('hakkindaModal').classList.add('hidden')">×</button>
+    </div>
+    <div style="padding:24px 28px;font-size:13px;line-height:1.9;color:var(--text2)">
+
+      <p style="color:var(--text);margin-bottom:16px">def, günlük yaşamını kayıt altına aldığın ve zamanla örüntüleri kendiliğinden keşfetmesini beklediğin bir araç.</p>
+
+      <p style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold3);margin-bottom:8px">nasıl kullanıyorsun</p>
+      <p style="margin-bottom:8px"><span style="color:var(--text)">Günlük</span> sekmesine her gün yaşananları yazıyorsun. <span style="color:var(--gold3)">sabah,</span> ile başlarsan sabah kaydı olarak işaretlenir. <span style="color:var(--gold3)">öğlen,</span> <span style="color:var(--gold3)">akşam,</span> <span style="color:var(--gold3)">gece,</span> de aynı şekilde çalışır.</p>
+      <p style="margin-bottom:8px"><span style="color:var(--text)">Gün Verisi</span> panelinde uyku saatini, yemeklerini, sporu, sağlık durumunu seçiyorsun.</p>
+      <p style="margin-bottom:20px"><span style="color:var(--text)">Rüya</span> ve <span style="color:var(--text)">İlginç</span> sekmeleri ayrı tutuluyor.</p>
+
+      <p style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold3);margin-bottom:8px">analiz ne yapıyor</p>
+      <p style="margin-bottom:20px">Yeterli veri biriktikten sonra Analiz butonu, hangi alışkanlığın neyi etkilediğini gösterir. Bunu bulmak için sana sormaz — kendisi tarar. Farkı büyük olan bağlantıları öne çıkarır, zincir oluşuyorsa gösterir.</p>
+
+      <p style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold3);margin-bottom:8px">veriler nerede</p>
+      <p>Her şey sadece senin cihazında. Hiçbir şey sunucuya gitmiyor. Sağ üstten JSON olarak yedekleyebilirsin.</p>
+
+    </div>
+  </div>
 </div>
 
 <!-- ANALİZ 2 MODALİ -->
