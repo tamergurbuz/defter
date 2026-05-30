@@ -970,7 +970,7 @@ document.getElementById('aramaInput').oninput=e=>{
 // =====================================================================
 function gvDoluMu(b){const v=gv[b];if(!v)return false;if(Array.isArray(v))return v.length>0;if(typeof v==='object')return Object.keys(v).some(k=>{const x=v[k];if(x===null||x===undefined||x===''||x===false)return false;if(Array.isArray(x))return x.length>0;if(typeof x==='object')return Object.keys(x).length>0;return true;});return false;}
 function gvCiz(){
-  const bs=[{k:'uyku',ad:'uyku',fn:gvCizUyku},{k:'ogunler',ad:'yemek',fn:gvCizYemek},{k:'icecek',ad:'içecek & su',fn:gvCizIcecek},{k:'spor',ad:'spor',fn:gvCizSpor},{k:'saglik',ad:'sağlık',fn:gvCizSaglik},{k:'ekran',ad:'ekran',fn:gvCizEkran},{k:'sosyal',ad:'sosyal',fn:gvCizSosyal}];
+  const bs=[{k:'uyku',ad:'uyku',fn:gvCizUyku},{k:'ogunler',ad:'yemek',fn:gvCizYemek},{k:'icecek',ad:'içecek & su',fn:gvCizIcecek},{k:'spor',ad:'spor',fn:gvCizSpor},{k:'hobi',ad:'hobi',fn:gvCizHobi},{k:'saglik',ad:'sağlık',fn:gvCizSaglik},{k:'ekran',ad:'ekran',fn:gvCizEkran},{k:'sosyal',ad:'sosyal',fn:gvCizSosyal}];
   document.getElementById('gvAcc').innerHTML=bs.map(b=>`<div class="gv-acc-item ${accAcik[b.k]?'acik':''}" id="acc-${b.k}"><div class="gv-acc-baslik" onclick="accTogle('${b.k}')"><span>${b.ad}${gvDoluMu(b.k)?'<span class="gv-dolu-dot"></span>':''}</span><span class="gv-acc-ok">▶</span></div><div class="gv-acc-icerik" id="acc-ic-${b.k}"></div></div>`).join('');
   bs.forEach(b=>{const el=document.getElementById(`acc-ic-${b.k}`);if(el)el.innerHTML=b.fn();});
 }
@@ -1003,6 +1003,17 @@ function gvCizSpor(){const sp=gv.spor||{};return`<span class="gv-label">seviye</
 function gvSpor(s){if(!gv.spor)gv.spor={};gv.spor.seviye=gv.spor.seviye===s?null:s;gvCiz();gvKayitGec();}
 function gvSporS(v){if(!gv.spor)gv.spor={};gv.spor.sure=v===''?null:parseInt(v);gvKayitGec();}
 function gvSporT(){gv.spor={};gvCiz();gvKayitGec();}
+function gvCizHobi(){
+  const h=gv.hobi||{};
+  function ni(lbl,al){return '<span class="gv-label">'+lbl+' (saat)</span><input type="number" min="0" max="24" step="0.5" class="gv-input gv-input-sm" value="'+(h[al]??'')+'" oninput="gvHobi(''+al+'',this.value)">';}
+  return ni('sanat (resim, çizim, fotoğraf vb.)','sanat_saat')
+    +ni('zanaat (ahşap, seramik, dikiş vb.)','zanaat_saat')
+    +'<span class="gv-label">diğer hobi</span>'
+    +'<input type="text" class="gv-input" placeholder="müzik, bahçe, koleksiyon..." value="'+(h.diger||'')+'" oninput="gvHobiD(this.value)">';
+}
+function gvHobi(k,v){if(!gv.hobi)gv.hobi={};gv.hobi[k]=v===''?null:parseFloat(v);gvKayitGec();}
+function gvHobiD(v){if(!gv.hobi)gv.hobi={};gv.hobi.diger=v;gvKayitGec();}
+
 function gvCizSaglik(){
   const sg=gv.saglik||{},aci=sg.aci||{},agri=sg.agri||{},bakt=sg.bakteriyel||{},viral=sg.viral||{};
   function bolgeBtn(tp,bolge,secili,siddetler){
