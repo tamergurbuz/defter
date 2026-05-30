@@ -1002,7 +1002,52 @@ function gvCizSpor(){const sp=gv.spor||{};return`<span class="gv-label">seviye</
 function gvSpor(s){if(!gv.spor)gv.spor={};gv.spor.seviye=gv.spor.seviye===s?null:s;gvCiz();gvKayitGec();}
 function gvSporS(v){if(!gv.spor)gv.spor={};gv.spor.sure=v===''?null:parseInt(v);gvKayitGec();}
 function gvSporT(){gv.spor={};gvCiz();gvKayitGec();}
-function gvCizSaglik(){const sg=gv.saglik||{},aci=sg.aci||{},agri=sg.agri||{};const bb=(tp,b,al)=>`<button class="gv-opt ${al.includes(b)?'aktif':''}" onclick="gvSB('${tp}','${b}')">${b}</button>`;return`<span class="gv-label">acı (ani)</span><div class="gv-row"><button class="gv-opt ${aci.var===false?'aktif':''}" onclick="gvSV('aci',false)">yok</button><button class="gv-opt ${aci.var===true?'aktif':''}" onclick="gvSV('aci',true)">var</button></div>${aci.var?`<span class="gv-label">bölge</span><div class="gv-row">${AGRI_BOLGE.map(b=>bb('aci',b,aci.bolge||[])).join('')}</div><span class="gv-label">şiddet: ${aci.siddet||1}</span><input type="range" min="1" max="10" value="${aci.siddet||1}" oninput="gvSS('aci',this.value)" style="width:100%;accent-color:var(--gold)">`:''}  <span class="gv-label">ağrı (sürekli)</span><div class="gv-row"><button class="gv-opt ${agri.var===false?'aktif':''}" onclick="gvSV('agri',false)">yok</button><button class="gv-opt ${agri.var===true?'aktif':''}" onclick="gvSV('agri',true)">var</button></div>${agri.var?`<span class="gv-label">bölge</span><div class="gv-row">${AGRI_BOLGE.map(b=>bb('agri',b,agri.bolge||[])).join('')}</div><span class="gv-label">şiddet: ${agri.siddet||1}</span><input type="range" min="1" max="10" value="${agri.siddet||1}" oninput="gvSS('agri',this.value)" style="width:100%;accent-color:var(--gold)">`:''}  <span class="gv-label">not</span><textarea class="gv-input" rows="2" oninput="gvSN(this.value)">${(sg.not||'')}</textarea>`;}
+function gvCizSaglik(){
+  const sg=gv.saglik||{},aci=sg.aci||{},agri=sg.agri||{};
+  const bakt=sg.bakteriyel||{},viral=sg.viral||{};
+  const bb=(tp,b,al)=>`<button class="gv-opt ${al.includes(b)?'aktif':''}" onclick="gvSB('${tp}','${b}')">${b}</button>`;
+  return `
+    <span class="gv-label">bakteriyel enfeksiyon (grip, nezle vb.)</span>
+    <div class="gv-row">
+      <button class="gv-opt ${bakt.var===false?'aktif':''}" onclick="gvSV('bakteriyel',false)">yok</button>
+      <button class="gv-opt ${bakt.var===true?'aktif':''}" onclick="gvSV('bakteriyel',true)">var</button>
+    </div>
+    ${bakt.var?`<span class="gv-label">şiddet: ${bakt.siddet||1}/10</span><input type="range" min="1" max="10" value="${bakt.siddet||1}" oninput="gvSS('bakteriyel',this.value)" style="width:100%;accent-color:var(--gold)">`:''}
+
+    <span class="gv-label">viral enfeksiyon (influenza, covid vb.)</span>
+    <div class="gv-row">
+      <button class="gv-opt ${viral.var===false?'aktif':''}" onclick="gvSV('viral',false)">yok</button>
+      <button class="gv-opt ${viral.var===true?'aktif':''}" onclick="gvSV('viral',true)">var</button>
+    </div>
+    ${viral.var?`<span class="gv-label">şiddet: ${viral.siddet||1}/10</span><input type="range" min="1" max="10" value="${viral.siddet||1}" oninput="gvSS('viral',this.value)" style="width:100%;accent-color:var(--gold)">`:''}
+
+    <span class="gv-label">ağrı</span>
+    <div class="gv-row">
+      <button class="gv-opt ${agri.var===false?'aktif':''}" onclick="gvSV('agri',false)">yok</button>
+      <button class="gv-opt ${agri.var===true?'aktif':''}" onclick="gvSV('agri',true)">var</button>
+    </div>
+    ${agri.var?`
+      <span class="gv-label">bölge</span>
+      <div class="gv-row">${AGRI_BOLGE.map(b=>bb('agri',b,agri.bolge||[])).join('')}</div>
+      <span class="gv-label">şiddet: ${agri.siddet||1}/10</span>
+      <input type="range" min="1" max="10" value="${agri.siddet||1}" oninput="gvSS('agri',this.value)" style="width:100%;accent-color:var(--gold)">
+    `:''}
+
+    <span class="gv-label">acı (ani/keskin)</span>
+    <div class="gv-row">
+      <button class="gv-opt ${aci.var===false?'aktif':''}" onclick="gvSV('aci',false)">yok</button>
+      <button class="gv-opt ${aci.var===true?'aktif':''}" onclick="gvSV('aci',true)">var</button>
+    </div>
+    ${aci.var?`
+      <span class="gv-label">bölge</span>
+      <div class="gv-row">${AGRI_BOLGE.map(b=>bb('aci',b,aci.bolge||[])).join('')}</div>
+      <span class="gv-label">şiddet: ${aci.siddet||1}/10</span>
+      <input type="range" min="1" max="10" value="${aci.siddet||1}" oninput="gvSS('aci',this.value)" style="width:100%;accent-color:var(--gold)">
+    `:''}
+
+    <span class="gv-label">diğer</span>
+    <textarea class="gv-input" rows="2" placeholder="farklı bir rahatsızlık varsa yaz…" oninput="gvSN(this.value)">${sg.not||''}</textarea>
+  `;}
 function gvSV(k,b){if(!gv.saglik)gv.saglik={};if(!gv.saglik[k])gv.saglik[k]={};gv.saglik[k].var=gv.saglik[k].var===b?null:b;if(!gv.saglik[k].var){gv.saglik[k].bolge=[];gv.saglik[k].siddet=null;}gvCiz();gvKayitGec();}
 function gvSB(k,b){if(!gv.saglik[k].bolge)gv.saglik[k].bolge=[];const l=gv.saglik[k].bolge,idx=l.indexOf(b);if(idx>=0)l.splice(idx,1);else l.push(b);gvCiz();gvKayitGec();}
 function gvSS(k,v){if(!gv.saglik[k])gv.saglik[k]={};gv.saglik[k].siddet=parseInt(v);document.getElementById('acc-ic-saglik').innerHTML=gvCizSaglik();gvKayitGec();}
