@@ -812,7 +812,7 @@ function doldurSec(id,list,plh){
 doldurSec('duygu',DUYGULAR,'— duygu —');
 doldurSec('enerji',ENERJILER,'— enerji —');
 
-document.getElementById('besinGrid').innerHTML=BESLENMELER.map(b=>`<button onclick="besinTogle('${b.ad}')" data-ad="${b.ad}" class="besin-chip">${b.e}</button>`).join('');
+if(document.getElementById('besinGrid'))document.getElementById('besinGrid').innerHTML=BESLENMELER.map(b=>`<button onclick="besinTogle('${b.ad}')" data-ad="${b.ad}" class="besin-chip">${b.e}</button>`).join('');
 
 function besinTogle(ad){if(seciliBesinler.has(ad))seciliBesinler.delete(ad);else seciliBesinler.add(ad);besinChipleriGuncelle();secimKaydetUI();}
 function besinChipleriGuncelle(){document.querySelectorAll('.besin-chip').forEach(el=>el.classList.toggle('aktif',seciliBesinler.has(el.dataset.ad)));}
