@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Playfair+Display:wght@700&display=swap&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg:       #f2efe8;
@@ -179,9 +179,10 @@ body {
   gap: 12px; margin-bottom: 16px; flex-wrap: wrap;
 }
 .gun-baslik-tarih {
-  font-size: 22px; font-weight: 700; color: var(--text3);
+  font-size: 24px; font-weight: 700;
+  color: var(--text3);
   font-family: 'Playfair Display', Georgia, serif;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.5px; font-style: normal;
 }
 .analiz2-btn {
   font-family: var(--font); font-size: 10px; letter-spacing: 2px;
@@ -850,10 +851,10 @@ function taslakKaydetGec(){
   clearTimeout(taslakTimer);
   taslakTimer=setTimeout(async()=>{
     const ic=document.getElementById('yeniIcerik').value;
-    const et=(document.getElementById('yeniEtiketler')||{value:''}).value;
+    const et='';
     const zm=document.getElementById('zamanSec').value;
     taslaklarLokal[aktifSekme]={icerik:ic,etiketler:et,zaman:zm};
-    await IDB.put('taslaklar',{tarih:seciliTarih,kategori:aktifSekme,icerik:ic,etiketler:et.split(',').map(s=>s.trim()).filter(Boolean),zaman:zm});
+    await IDB.put('taslaklar',{tarih:seciliTarih,kategori:aktifSekme,icerik:ic,etiketler:[].filter(Boolean),zaman:zm});
     const ind=document.getElementById('taslakInd'); ind.classList.add('gorunur');
     setTimeout(()=>ind.classList.remove('gorunur'),1500);
     taslakNoktalariniGuncelle();
