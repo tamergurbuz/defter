@@ -998,7 +998,7 @@ function gvKafein(v){if(!gv.icecek)gv.icecek={};gv.icecek.kafein_saatleri=v.spli
 function gvAlk(b){if(!gv.icecek)gv.icecek={};if(!gv.icecek.alkol)gv.icecek.alkol={};gv.icecek.alkol.var=gv.icecek.alkol.var===b?null:b;gvCiz();gvKayitGec();}
 function gvAlkM(v){if(!gv.icecek.alkol)gv.icecek.alkol={};gv.icecek.alkol.miktar=v===''?null:parseInt(v);gvKayitGec();}
 function gvSu(v){if(!gv.icecek)gv.icecek={};gv.icecek.su=v===''?null:parseInt(v);gvKayitGec();}
-function gvCizSpor(){const sp=gv.spor||{};return`<span class="gv-label">seviye</span><div class="gv-row">${SPOR_SEV.map(s=>`<button class="gv-opt ${sp.seviye===s?'aktif':''}" onclick="gvSpor('${s}')">${s}</button>`).join('')}<button class="gv-opt" onclick="gvSporT()">temizle</button></div><span class="gv-label">süre (dk)</span><input type="number" min="0" max="600" class="gv-input gv-input-sm" value="${sp.sure??''}" oninput="gvSporS(this.value)">`;}
+function gvCizSpor(){const sp=gv.spor||{};return`<span class="gv-label">seviye</span><div class="gv-row"><button class="gv-opt ${!sp.seviye?'aktif':''}" onclick="gvSporT()">yok</button>${SPOR_SEV.map(s=>`<button class="gv-opt ${sp.seviye===s?'aktif':''}" onclick="gvSpor('${s}')">${s}</button>`).join('')}</div><span class="gv-label">süre (dk)</span><input type="number" min="0" max="600" class="gv-input gv-input-sm" value="${sp.sure??''}" oninput="gvSporS(this.value)">`;}
 function gvSpor(s){if(!gv.spor)gv.spor={};gv.spor.seviye=gv.spor.seviye===s?null:s;gvCiz();gvKayitGec();}
 function gvSporS(v){if(!gv.spor)gv.spor={};gv.spor.sure=v===''?null:parseInt(v);gvKayitGec();}
 function gvSporT(){gv.spor={};gvCiz();gvKayitGec();}
