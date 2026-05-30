@@ -1005,11 +1005,10 @@ function gvSporS(v){if(!gv.spor)gv.spor={};gv.spor.sure=v===''?null:parseInt(v);
 function gvSporT(){gv.spor={};gvCiz();gvKayitGec();}
 function gvCizHobi(){
   const h=gv.hobi||{};
-  function ni(lbl,al){return '<span class="gv-label">'+lbl+' (saat)</span><input type="number" min="0" max="24" step="0.5" class="gv-input gv-input-sm" value="'+(h[al]??'')+'" oninput="gvHobi(''+al+'',this.value)">';}
-  return ni('sanat (resim, çizim, fotoğraf vb.)','sanat_saat')
-    +ni('zanaat (ahşap, seramik, dikiş vb.)','zanaat_saat')
-    +'<span class="gv-label">diğer hobi</span>'
-    +'<input type="text" class="gv-input" placeholder="müzik, bahçe, koleksiyon..." value="'+(h.diger||'')+'" oninput="gvHobiD(this.value)">';
+  const sanat='<span class="gv-label">sanat (resim, çizim, fotoğraf vb.) (saat)</span><input type="number" min="0" max="24" step="0.5" class="gv-input gv-input-sm" value="'+(h.sanat_saat??'')+'" oninput="gvHobi('sanat_saat',this.value)">';
+  const zanaat='<span class="gv-label">zanaat (ahşap, seramik, dikiş vb.) (saat)</span><input type="number" min="0" max="24" step="0.5" class="gv-input gv-input-sm" value="'+(h.zanaat_saat??'')+'" oninput="gvHobi('zanaat_saat',this.value)">';
+  const diger='<span class="gv-label">diğer hobi</span><input type="text" class="gv-input" placeholder="müzik, bahçe, koleksiyon..." value="'+(h.diger||'')+'" oninput="gvHobiD(this.value)">';
+  return sanat+zanaat+diger;
 }
 function gvHobi(k,v){if(!gv.hobi)gv.hobi={};gv.hobi[k]=v===''?null:parseFloat(v);gvKayitGec();}
 function gvHobiD(v){if(!gv.hobi)gv.hobi={};gv.hobi.diger=v;gvKayitGec();}
