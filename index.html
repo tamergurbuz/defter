@@ -1103,8 +1103,15 @@ function gvCizAlkolSigara(){
   r+='<button class="gv-opt '+(alk.distile==='cok'?'aktif':'')+'" onclick="gvAlkTip(\'distile\',\'cok\')">çok</button>';
   r+='</div>';
   // Sigara
-  r+='<span class="gv-label">sigara (adet)</span>';
-  r+='<input type="number" min="0" max="100" class="gv-input gv-input-sm" value="'+(sig.adet||'')+'" oninput="gvSigara(\'adet\',this.value)">';
+  r+='<span class="gv-label">sigara</span>';
+  r+='<div class="gv-row">';
+  r+='<button class="gv-opt '+(sig.var===false?'aktif':'')+'" onclick="gvSigara(\'var\',false)">yok</button>';
+  r+='<button class="gv-opt '+(sig.var===true?'aktif':'')+'" onclick="gvSigara(\'var\',true)">var</button>';
+  r+='</div>';
+  if(sig.var===true){
+    r+='<span class="gv-label">adet</span>';
+    r+='<input type="number" min="1" max="100" class="gv-input gv-input-sm" value="'+(sig.adet||'')+'" oninput="gvSigara(\'adet\',this.value)">';
+  }
   // Pasif içicilik
   r+='<span class="gv-label">pasif içicilik (sigara dumanına maruz)</span>';
   r+='<div class="gv-row">';
@@ -1123,7 +1130,14 @@ function gvAlkTip(tip,val){
 function gvSigara(k,v){
   if(!gv.alkol_sigara)gv.alkol_sigara={};
   if(!gv.alkol_sigara.sigara)gv.alkol_sigara.sigara={};
-  gv.alkol_sigara.sigara[k]=(k==='adet')?(v===''?null:parseInt(v)):(gv.alkol_sigara.sigara[k]===v?null:v);
+  if(k==='var'){
+    gv.alkol_sigara.sigara.var=gv.alkol_sigara.sigara.var===v?null:v;
+    if(!gv.alkol_sigara.sigara.var)gv.alkol_sigara.sigara.adet=null;
+  } else if(k==='adet'){
+    gv.alkol_sigara.sigara.adet=v===''?null:parseInt(v);
+  } else {
+    gv.alkol_sigara.sigara[k]=gv.alkol_sigara.sigara[k]===v?null:v;
+  }
   gvCiz();gvKayitGec();
 }
 function gvCizSpor(){const sp=gv.spor||{};return`<span class="gv-label">seviye</span><div class="gv-row"><button class="gv-opt ${!sp.seviye?'aktif':''}" onclick="gvSporT()">yok</button>${SPOR_SEV.map(s=>`<button class="gv-opt ${sp.seviye===s?'aktif':''}" onclick="gvSpor('${s}')">${s}</button>`).join('')}</div><span class="gv-label">süre (dk)</span><input type="number" min="0" max="600" class="gv-input gv-input-sm" value="${sp.sure??''}" oninput="gvSporS(this.value)">`;}
