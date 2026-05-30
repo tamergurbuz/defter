@@ -569,12 +569,7 @@ mark { background: var(--gold3); color: var(--bg); padding: 0 1px; }
       <div class="editor-ust">
         <span class="editor-kat-etiket" id="yeniKatEtiket"></span>
         <span class="taslak-ind" id="taslakInd">— kaydedildi</span>
-        <select class="def-select-sm" id="zamanSec">
-          <option value="">— zaman —</option>
-          <option value="sabah">sabah</option>
-          <option value="oglen">öğlen</option>
-          <option value="aksam">akşam</option>
-        </select>
+<span style="font-size:10px;color:var(--text3)">sabah, / öğlen, / akşam, / gece,</span>
       </div>
 
       <textarea class="def-textarea" id="yeniIcerik" rows="5"></textarea>
@@ -833,7 +828,7 @@ function taslakNoktalariniGuncelle(){
   document.getElementById('taslakSilBtn').style.display=dolu?'inline-block':'none';
 }
 function sekmeAc(kat){
-  if(sonGunData)taslaklarLokal[aktifSekme]={icerik:document.getElementById('yeniIcerik').value,etiketler:(document.getElementById('yeniEtiketler')||{value:''}).value,zaman:document.getElementById('zamanSec').value};
+  if(sonGunData)taslaklarLokal[aktifSekme]={icerik:document.getElementById('yeniIcerik').value,etiketler:(document.getElementById('yeniEtiketler')||{value:''}).value,zaman:''};
   aktifSekme=kat; localStorage.setItem('aktifSekme',kat);
   document.querySelectorAll('.sekme-btn').forEach(b=>b.classList.remove('aktif'));
   document.getElementById(`sekmeBtn-${kat}`).classList.add('aktif');
@@ -842,7 +837,7 @@ function sekmeAc(kat){
   const t=taslaklarLokal[kat]||{};
   document.getElementById('yeniIcerik').value=t.icerik||'';
   (document.getElementById('yeniEtiketler')||{value:''}).value=t.etiketler||'';
-  document.getElementById('zamanSec').value=t.zaman||'';
+  // zamanSec kaldırıldı
   if(sonGunData)notlariCiz(sonGunData);
   taslakNoktalariniGuncelle();
 }
@@ -851,19 +846,18 @@ function taslakKaydetGec(){
   taslakTimer=setTimeout(async()=>{
     const ic=document.getElementById('yeniIcerik').value;
     const et='';
-    const zm=document.getElementById('zamanSec').value;
-    taslaklarLokal[aktifSekme]={icerik:ic,etiketler:et,zaman:zm};
-    await IDB.put('taslaklar',{tarih:seciliTarih,kategori:aktifSekme,icerik:ic,etiketler:[].filter(Boolean),zaman:zm});
+    taslaklarLokal[aktifSekme]={icerik:ic,etiketler:et,zaman:''};
+    await IDB.put('taslaklar',{tarih:seciliTarih,kategori:aktifSekme,icerik:ic,etiketler:[].filter(Boolean),zaman:''});
     const ind=document.getElementById('taslakInd'); ind.classList.add('gorunur');
     setTimeout(()=>ind.classList.remove('gorunur'),1500);
     taslakNoktalariniGuncelle();
   },1500);
 }
 document.getElementById('yeniIcerik').addEventListener('input',taslakKaydetGec);
-document.getElementById('zamanSec').addEventListener('change',taslakKaydetGec);
+// zamanSec kaldırıldı
 async function taslakSil(){
   if(!confirm('Taslak silinsin mi?'))return;
-  document.getElementById('yeniIcerik').value=''; (document.getElementById('yeniEtiketler')||{value:''}).value=''; document.getElementById('zamanSec').value='';
+  document.getElementById('yeniIcerik').value=''; if(document.getElementById('yeniEtiketler'))document.getElementById('yeniEtiketler').value='';
   taslaklarLokal[aktifSekme]={icerik:'',etiketler:'',zaman:''};
   await IDB.put('taslaklar',{tarih:seciliTarih,kategori:aktifSekme,icerik:'',etiketler:[],zaman:''});
   taslakNoktalariniGuncelle();
@@ -877,16 +871,19 @@ function notlariCiz(data){
   const filtre=data.notlar.filter(n=>n.kategori===aktifSekme);
   ['gunluk','ruya','ilginc'].forEach(k=>document.getElementById(`sayac-${k}`).textContent=data.notlar.filter(n=>n.kategori===k).length);
   if(!filtre.length){liste.innerHTML=`<div style="font-size:11px;color:var(--text3);padding:12px 0;font-style:italic">bu gün için ${KAT_AD[aktifSekme]} kaydı yok_</div>`;return;}
-  liste.innerHTML=filtre.map(n=>`
-    <div class="not-kart ${n.kategori}">
+  liste.innerHTML=filtre.map(n=>{
+    const zamanRozetler=(n.zamanlar||[]).map(z=>`<span class="not-zaman">${ZAMAN_TR[z]||z}</span>`).join('');
+    const icerikVurgulu=esc(n.icerik).replace(/\b(sabah|öğlen|akşam|gece)\s*,/gi,'<span style="color:var(--gold3);font-weight:700">$1,</span>');
+    return `<div class="not-kart ${n.kategori}">
       <button class="not-sil" onclick="notSil(${n.id})">[ sil ]</button>
       <div class="not-meta">
         <span class="not-kat ${n.kategori}">${KAT_AD[n.kategori]}</span>
-        ${n.zaman?`<span class="not-zaman">${ZAMAN_TR[n.zaman]||n.zaman}</span>`:''}
+        ${zamanRozetler}
       </div>
-      <div class="not-icerik">${esc(n.icerik)}</div>
+      <div class="not-icerik">${icerikVurgulu}</div>
       ${n.etiketler&&n.etiketler.length?`<div class="not-etiketler">${n.etiketler.map(e=>`<span class="not-etiket" onclick="etiketAc('${esc(e)}')">#${esc(e)}</span>`).join('')}</div>`:''}
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 async function gunYukle(tarih){
   seciliTarih=tarih;
@@ -898,17 +895,46 @@ async function gunYukle(tarih){
   taslaklarLokal=r.taslaklar;
   const t=taslaklarLokal[aktifSekme]||{};
   document.getElementById('yeniIcerik').value=t.icerik||'';
-  (document.getElementById('yeniEtiketler')||{value:''}).value=t.etiketler||'';
-  document.getElementById('zamanSec').value=t.zaman||'';
+  if(document.getElementById('yeniEtiketler'))document.getElementById('yeniEtiketler').value=t.etiketler||'';
+  // Günlük notu textarea'ya yükle
+  if(aktifSekme==='gunluk'&&r.notlar){
+    const gn=r.notlar.find(n=>n.kategori==='gunluk');
+    if(gn&&!t.icerik)document.getElementById('yeniIcerik').value=gn.icerik||'';
+  }
   notlariCiz(r); taslakNoktalariniGuncelle();
   gv=r.gun_verileri; if(!gv)gv={uyku:{},ogunler:[],icecek:{},spor:{},saglik:{},ekran:{},sosyal:{}};
   if(!gv.ogunler)gv.ogunler=[]; gvCiz(); takvimCiz();
 }
+function zamanParseEt(metin){
+  // sabah, / öğlen, / akşam, / gece, ile başlayan bölümleri bul
+  const zamanlar=[];
+  const re=/\b(sabah|öğlen|oglen|akşam|aksam|gece)\s*,/gi;
+  let m;
+  while((m=re.exec(metin))!==null){
+    const z=m[1].toLowerCase().replace('öğlen','oglen').replace('akşam','aksam');
+    if(!zamanlar.includes(z))zamanlar.push(z);
+  }
+  return zamanlar;
+}
 async function notKaydet(){
   const ic=document.getElementById('yeniIcerik').value.trim(); if(!ic)return;
-  const et=(document.getElementById('yeniEtiketler')||{value:''}).value.split(',').map(s=>s.trim()).filter(Boolean);
-  await IDB.put('notlar',{tarih:seciliTarih,kategori:aktifSekme,icerik:ic,etiketler:et,zaman:document.getElementById('zamanSec').value||null,olusturulma:new Date().toISOString()});
-  document.getElementById('yeniIcerik').value=''; (document.getElementById('yeniEtiketler')||{value:''}).value=''; document.getElementById('zamanSec').value='';
+  const et=(document.getElementById('yeniEtiketler')||{value:''}).value.split(',').map(s=>s.trim()).filter(Boolean).filter(e=>!['sabah','öğlen','oglen','akşam','aksam','gece'].includes(e.toLowerCase()));
+  const zamanlar=zamanParseEt(ic);
+  // Günlük için: gün içinde tek not - varsa güncelle
+  if(aktifSekme==='gunluk'){
+    const tumNotlar=await IDB.getAll('notlar');
+    const gunlukNot=tumNotlar.find(n=>n.tarih===seciliTarih&&n.kategori==='gunluk');
+    if(gunlukNot){
+      gunlukNot.icerik=ic; gunlukNot.etiketler=et; gunlukNot.zamanlar=zamanlar;
+      await IDB.put('notlar',gunlukNot);
+    } else {
+      await IDB.put('notlar',{tarih:seciliTarih,kategori:'gunluk',icerik:ic,etiketler:et,zamanlar:zamanlar,zaman:zamanlar[0]||null,olusturulma:new Date().toISOString()});
+    }
+  } else {
+    await IDB.put('notlar',{tarih:seciliTarih,kategori:aktifSekme,icerik:ic,etiketler:et,zamanlar:zamanlar,zaman:zamanlar[0]||null,olusturulma:new Date().toISOString()});
+  }
+  document.getElementById('yeniIcerik').value='';
+  if(document.getElementById('yeniEtiketler'))document.getElementById('yeniEtiketler').value='';
   taslaklarLokal[aktifSekme]={icerik:'',etiketler:'',zaman:''};
   await IDB.put('taslaklar',{tarih:seciliTarih,kategori:aktifSekme,icerik:'',etiketler:[],zaman:''});
   taslakNoktalariniGuncelle(); gunYukle(seciliTarih); tumGunleriYukle(); etiketleriYukle();
