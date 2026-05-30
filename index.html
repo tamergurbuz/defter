@@ -751,7 +751,7 @@ async function gunGetir(tarih) {
   ]);
   const taslaklar = {gunluk:{icerik:'',etiketler:'',zaman:''},ruya:{icerik:'',etiketler:'',zaman:''},ilginc:{icerik:'',etiketler:'',zaman:''}};
   for (const t of tum_t) if (t.tarih===tarih) taslaklar[t.kategori]={icerik:t.icerik||'',etiketler:(t.etiketler||[]).join(', '),zaman:t.zaman||''};
-  return { notlar:notlar||[], secim:secim||{duygu:'',enerji:'',beslenme:[]}, gun_verileri:gv||{uyku:{},ogunler:[],icecek:{},spor:{},saglik:{},ekran:{},sosyal:{}}, taslaklar };
+  return { notlar:notlar||[], secim:secim||{duygu:'',enerji:'',beslenme:[]}, gun_verileri:gv||{uyku:{},ogunler:[],icecek:{},yiyecek:{},alkol_sigara:{},spor:{},saglik:{},ekran:{},sosyal:{}}, taslaklar };
 }
 async function notluGunler() {
   const tum=await IDB.getAll('notlar'); const map={};
@@ -801,7 +801,7 @@ let takvimAy=new Date().getMonth(), takvimYil=new Date().getFullYear();
 let seciliBesinler=new Set();
 let aktifSekme=localStorage.getItem('aktifSekme')||'gunluk';
 let sonGunData=null, taslaklarLokal={gunluk:{},ruya:{},ilginc:{}};
-let taslakTimer=null, gv={uyku:{},ogunler:[],icecek:{},spor:{},saglik:{},ekran:{},sosyal:{}};
+let taslakTimer=null, gv={uyku:{},ogunler:[],icecek:{},yiyecek:{},alkol_sigara:{},spor:{},saglik:{},ekran:{},sosyal:{}};
 let gvTimer=null, accAcik=JSON.parse(localStorage.getItem('accAcik')||'{}');
 let A2_BULGULAR=[], A2_PENCERE='hepsi', A2_SONUC='hepsi', A2_MIN_KOK=40;
 
@@ -930,7 +930,7 @@ async function gunYukle(tarih){
     if(gn&&!t.icerik)document.getElementById('yeniIcerik').value=gn.icerik||'';
   }
   notlariCiz(r); taslakNoktalariniGuncelle();
-  gv=r.gun_verileri; if(!gv)gv={uyku:{},ogunler:[],icecek:{},spor:{},saglik:{},ekran:{},sosyal:{}};
+  gv=r.gun_verileri; if(!gv)gv={uyku:{},ogunler:[],icecek:{},yiyecek:{},alkol_sigara:{},spor:{},saglik:{},ekran:{},sosyal:{}};
   if(!gv.ogunler)gv.ogunler=[]; gvCiz(); takvimCiz();
 }
 function zamanParseEt(metin){
@@ -1034,7 +1034,7 @@ document.getElementById('aramaInput').oninput=e=>{
 // =====================================================================
 function gvDoluMu(b){const v=gv[b];if(!v)return false;if(Array.isArray(v))return v.length>0;if(typeof v==='object')return Object.keys(v).some(k=>{const x=v[k];if(x===null||x===undefined||x===''||x===false)return false;if(Array.isArray(x))return x.length>0;if(typeof x==='object')return Object.keys(x).length>0;return true;});return false;}
 function gvCiz(){
-  const bs=[{k:'uyku',ad:'uyku',fn:gvCizUyku},{k:'ogunler',ad:'yemek',fn:gvCizYemek},{k:'icecek',ad:'içecek & su',fn:gvCizIcecek},{k:'spor',ad:'spor',fn:gvCizSpor},{k:'hobi',ad:'hobi',fn:gvCizHobi},{k:'saglik',ad:'sağlık',fn:gvCizSaglik},{k:'ekran',ad:'ekran',fn:gvCizEkran},{k:'sosyal',ad:'sosyal',fn:gvCizSosyal}];
+  const bs=[{k:'uyku',ad:'uyku',fn:gvCizUyku},{k:'yiyecek',ad:'yiyecek & içecek',fn:gvCizYiyecek},{k:'alkol_sigara',ad:'alkol & sigara',fn:gvCizAlkolSigara},{k:'spor',ad:'spor',fn:gvCizSpor},{k:'hobi',ad:'hobi',fn:gvCizHobi},{k:'saglik',ad:'sağlık',fn:gvCizSaglik},{k:'ekran',ad:'ekran',fn:gvCizEkran},{k:'sosyal',ad:'sosyal',fn:gvCizSosyal}];
   document.getElementById('gvAcc').innerHTML=bs.map(b=>`<div class="gv-acc-item ${accAcik[b.k]?'acik':''}" id="acc-${b.k}"><div class="gv-acc-baslik" onclick="accTogle('${b.k}')"><span>${b.ad}${gvDoluMu(b.k)?'<span class="gv-dolu-dot"></span>':''}</span><span class="gv-acc-ok">▶</span></div><div class="gv-acc-icerik" id="acc-ic-${b.k}"></div></div>`).join('');
   bs.forEach(b=>{const el=document.getElementById(`acc-ic-${b.k}`);if(el)el.innerHTML=b.fn();});
 }
@@ -1051,18 +1051,81 @@ function gvCizUyku(){const u=gv.uyku||{};return`<span class="gv-label">yatış</
 function gvUs(k,v){if(!gv.uyku)gv.uyku={};gv.uyku[k]=gv.uyku[k]===v?null:v;gvCiz();gvKayitGec();}
 function gvUn(k,v){if(!gv.uyku)gv.uyku={};gv.uyku[k]=v===''?null:parseFloat(v);gvKayitGec();}
 function gvUb(k,v){if(!gv.uyku)gv.uyku={};gv.uyku[k]=gv.uyku[k]===v?null:v;gvCiz();gvKayitGec();}
-function gvCizYemek(){if(!gv.ogunler)gv.ogunler=[];return gv.ogunler.map((o,i)=>`<div class="ogun-karti"><button class="ogun-sil" onclick="gvOS(${i})">[ × ]</button><span class="gv-label">öğün tipi</span><div class="gv-row">${OGUN_TIPLER.map(t=>`<button class="gv-opt ${o.tip===t?'aktif':''}" onclick="gvOSet(${i},'tip','${t}')">${t}</button>`).join('')}</div><span class="gv-label">yer</span><div class="gv-row">${OGUN_YERI.map(y=>`<button class="gv-opt ${o.yer===y?'aktif':''}" onclick="gvOSet(${i},'yer','${y}')">${y}</button>`).join('')}</div><span class="gv-label">miktar</span><div class="gv-row">${OGUN_MIKTAR.map(m=>`<button class="gv-opt ${o.miktar===m?'aktif':''}" onclick="gvOSet(${i},'miktar','${m}')">${m}</button>`).join('')}</div><span class="gv-label">içerik</span><div class="gv-row"><button class="gv-opt ${o.gluten?'aktif':''}" onclick="gvOT(${i},'gluten')">gluten</button><button class="gv-opt ${o.seker?'aktif':''}" onclick="gvOT(${i},'seker')">şeker</button></div><span class="gv-label">besinler</span><div class="gv-row">${ANA_BESIN.map(b=>{const a=(o.besinler||[]).includes(b);return`<button class="gv-opt ${a?'aktif':''}" onclick="gvOBT(${i},'${b}')">${b}</button>`;}).join('')}</div></div>`).join('')+`<button class="gv-opt" style="margin-top:6px" onclick="gvOE()">+ öğün ekle</button>`;}
-function gvOE(){gv.ogunler.push({tip:null,yer:null,miktar:null,gluten:false,seker:false,besinler:[]});gvCiz();gvKayitGec();}
-function gvOS(i){gv.ogunler.splice(i,1);gvCiz();gvKayitGec();}
-function gvOSet(i,k,v){gv.ogunler[i][k]=gv.ogunler[i][k]===v?null:v;gvCiz();gvKayitGec();}
-function gvOT(i,k){gv.ogunler[i][k]=!gv.ogunler[i][k];gvCiz();gvKayitGec();}
-function gvOBT(i,b){if(!gv.ogunler[i].besinler)gv.ogunler[i].besinler=[];const l=gv.ogunler[i].besinler,idx=l.indexOf(b);if(idx>=0)l.splice(idx,1);else l.push(b);gvCiz();gvKayitGec();}
-function gvCizIcecek(){const ic=gv.icecek||{},alk=ic.alkol||{};return`<span class="gv-label">kafein saatleri</span><input type="text" class="gv-input" placeholder="8, 14, 16" value="${(ic.kafein_saatleri||[]).join(', ')}" oninput="gvKafein(this.value)"><span class="gv-label">alkol — fermente (bira, şarap, rakı vb.)</span><div class="gv-row"><button class="gv-opt ${alk.fermente===false?'aktif':''}" onclick="gvAlkTip('fermente',false)">yok</button><button class="gv-opt ${alk.fermente==='az'?'aktif':''}" onclick="gvAlkTip('fermente','az')">az</button><button class="gv-opt ${alk.fermente==='orta'?'aktif':''}" onclick="gvAlkTip('fermente','orta')">orta</button><button class="gv-opt ${alk.fermente==='cok'?'aktif':''}" onclick="gvAlkTip('fermente','cok')">çok</button></div><span class="gv-label">alkol — distile (viski, votka, cin vb.)</span><div class="gv-row"><button class="gv-opt ${alk.distile===false?'aktif':''}" onclick="gvAlkTip('distile',false)">yok</button><button class="gv-opt ${alk.distile==='az'?'aktif':''}" onclick="gvAlkTip('distile','az')">az</button><button class="gv-opt ${alk.distile==='orta'?'aktif':''}" onclick="gvAlkTip('distile','orta')">orta</button><button class="gv-opt ${alk.distile==='cok'?'aktif':''}" onclick="gvAlkTip('distile','cok')">çok</button></div><span class="gv-label">su (bardak)</span><input type="number" min="0" max="30" class="gv-input gv-input-sm" value="${ic.su??''}" oninput="gvSu(this.value)">`;}
-function gvKafein(v){if(!gv.icecek)gv.icecek={};gv.icecek.kafein_saatleri=v.split(',').map(s=>s.trim()).filter(Boolean).map(Number).filter(n=>!isNaN(n));gvKayitGec();}
-function gvAlk(b){if(!gv.icecek)gv.icecek={};if(!gv.icecek.alkol)gv.icecek.alkol={};gv.icecek.alkol.var=gv.icecek.alkol.var===b?null:b;gvCiz();gvKayitGec();}
-function gvAlkM(v){if(!gv.icecek.alkol)gv.icecek.alkol={};gv.icecek.alkol.miktar=v===''?null:parseInt(v);gvKayitGec();}
-function gvAlkTip(tip,val){if(!gv.icecek)gv.icecek={};if(!gv.icecek.alkol)gv.icecek.alkol={};gv.icecek.alkol[tip]=gv.icecek.alkol[tip]===val?null:val;gv.icecek.alkol.var=(gv.icecek.alkol.fermente||gv.icecek.alkol.distile)?true:false;gvCiz();gvKayitGec();}
-function gvSu(v){if(!gv.icecek)gv.icecek={};gv.icecek.su=v===''?null:parseInt(v);gvKayitGec();}
+function gvCizYiyecek(){
+  if(!gv.ogunler)gv.ogunler=[];
+  var ic=gv.icecek||{};
+  var kartlar=gv.ogunler.map(function(o,i){
+    return '<div class="ogun-karti">'
+      +'<button class="ogun-sil" onclick="gvOgunSil('+i+')">[ × ]</button>'
+      +'<span class="gv-label">öğün tipi</span><div class="gv-row">'
+      +OGUN_TIPLER.map(function(t){return'<button class="gv-opt '+(o.tip===t?'aktif':'')+'" onclick="gvOgunSet('+i+',\'tip\',\''+t+'\')">'+t+'</button>';}).join('')
+      +'</div><span class="gv-label">yer</span><div class="gv-row">'
+      +OGUN_YERI.map(function(y){return'<button class="gv-opt '+(o.yer===y?'aktif':'')+'" onclick="gvOgunSet('+i+',\'yer\',\''+y+'\')">'+y+'</button>';}).join('')
+      +'</div><span class="gv-label">miktar</span><div class="gv-row">'
+      +OGUN_MIKTAR.map(function(m){return'<button class="gv-opt '+(o.miktar===m?'aktif':'')+'" onclick="gvOgunSet('+i+',\'miktar\',\''+m+'\')">'+m+'</button>';}).join('')
+      +'</div><span class="gv-label">içerik</span><div class="gv-row">'
+      +'<button class="gv-opt '+(o.gluten?'aktif':'')+'" onclick="gvOgunTogle('+i+',\'gluten\')">gluten</button>'
+      +'<button class="gv-opt '+(o.seker?'aktif':'')+'" onclick="gvOgunTogle('+i+',\'seker\')">şeker</button>'
+      +'</div><span class="gv-label">besinler</span><div class="gv-row">'
+      +ANA_BESIN.map(function(b){var a=(o.besinler||[]).includes(b);return'<button class="gv-opt '+(a?'aktif':'')+'" onclick="gvOgunBesinTogle('+i+',\''+b+'\')">'+b+'</button>';}).join('')
+      +'</div></div>';
+  }).join('');
+  // İçecek kısmı
+  var kafeinStr=(ic.kafein_saatleri||[]).join(', ');
+  var suStr=ic.su||'';
+  var icecekHtml='<div style="border-top:1px dashed var(--border);margin-top:12px;padding-top:10px">'
+    +'<span class="gv-label">kafein saatleri</span>'
+    +'<input type="text" class="gv-input" placeholder="8, 14, 16" value="'+kafeinStr+'" oninput="gvKafein(this.value)">'
+    +'<span class="gv-label">su (bardak)</span>'
+    +'<input type="number" min="0" max="30" class="gv-input gv-input-sm" value="'+suStr+'" oninput="gvSu(this.value)">'
+    +'</div>';
+  return kartlar+'<button class="gv-opt" style="margin-top:6px" onclick="gvOgunEkle()">+ öğün ekle</button>'+icecekHtml;
+}
+function gvCizAlkolSigara(){
+  var as=gv.alkol_sigara||{};
+  var alk=as.alkol||{};
+  var sig=as.sigara||{};
+  var r='';
+  // Alkol - fermente
+  r+='<span class="gv-label">alkol — fermente (bira, şarap vb.)</span>';
+  r+='<div class="gv-row">';
+  r+='<button class="gv-opt '+(alk.fermente===false?'aktif':'')+'" onclick="gvAlkTip(\'fermente\',false)">yok</button>';
+  r+='<button class="gv-opt '+(alk.fermente==='az'?'aktif':'')+'" onclick="gvAlkTip(\'fermente\',\'az\')">az</button>';
+  r+='<button class="gv-opt '+(alk.fermente==='orta'?'aktif':'')+'" onclick="gvAlkTip(\'fermente\',\'orta\')">orta</button>';
+  r+='<button class="gv-opt '+(alk.fermente==='cok'?'aktif':'')+'" onclick="gvAlkTip(\'fermente\',\'cok\')">çok</button>';
+  r+='</div>';
+  // Alkol - distile
+  r+='<span class="gv-label">alkol — distile (viski, votka vb.)</span>';
+  r+='<div class="gv-row">';
+  r+='<button class="gv-opt '+(alk.distile===false?'aktif':'')+'" onclick="gvAlkTip(\'distile\',false)">yok</button>';
+  r+='<button class="gv-opt '+(alk.distile==='az'?'aktif':'')+'" onclick="gvAlkTip(\'distile\',\'az\')">az</button>';
+  r+='<button class="gv-opt '+(alk.distile==='orta'?'aktif':'')+'" onclick="gvAlkTip(\'distile\',\'orta\')">orta</button>';
+  r+='<button class="gv-opt '+(alk.distile==='cok'?'aktif':'')+'" onclick="gvAlkTip(\'distile\',\'cok\')">çok</button>';
+  r+='</div>';
+  // Sigara
+  r+='<span class="gv-label">sigara (adet)</span>';
+  r+='<input type="number" min="0" max="100" class="gv-input gv-input-sm" value="'+(sig.adet||'')+'" oninput="gvSigara(\'adet\',this.value)">';
+  // Pasif içicilik
+  r+='<span class="gv-label">pasif içicilik (sigara dumanına maruz)</span>';
+  r+='<div class="gv-row">';
+  r+='<button class="gv-opt '+(sig.pasif===false?'aktif':'')+'" onclick="gvSigara(\'pasif\',false)">yok</button>';
+  r+='<button class="gv-opt '+(sig.pasif==='az'?'aktif':'')+'" onclick="gvSigara(\'pasif\',\'az\')">az</button>';
+  r+='<button class="gv-opt '+(sig.pasif==='cok'?'aktif':'')+'" onclick="gvSigara(\'pasif\',\'cok\')">çok</button>';
+  r+='</div>';
+  return r;
+}
+function gvAlkTip(tip,val){
+  if(!gv.alkol_sigara)gv.alkol_sigara={};
+  if(!gv.alkol_sigara.alkol)gv.alkol_sigara.alkol={};
+  gv.alkol_sigara.alkol[tip]=gv.alkol_sigara.alkol[tip]===val?null:val;
+  gvCiz();gvKayitGec();
+}
+function gvSigara(k,v){
+  if(!gv.alkol_sigara)gv.alkol_sigara={};
+  if(!gv.alkol_sigara.sigara)gv.alkol_sigara.sigara={};
+  gv.alkol_sigara.sigara[k]=(k==='adet')?(v===''?null:parseInt(v)):(gv.alkol_sigara.sigara[k]===v?null:v);
+  gvCiz();gvKayitGec();
+}
 function gvCizSpor(){const sp=gv.spor||{};return`<span class="gv-label">seviye</span><div class="gv-row"><button class="gv-opt ${!sp.seviye?'aktif':''}" onclick="gvSporT()">yok</button>${SPOR_SEV.map(s=>`<button class="gv-opt ${sp.seviye===s?'aktif':''}" onclick="gvSpor('${s}')">${s}</button>`).join('')}</div><span class="gv-label">süre (dk)</span><input type="number" min="0" max="600" class="gv-input gv-input-sm" value="${sp.sure??''}" oninput="gvSporS(this.value)">`;}
 function gvSpor(s){if(!gv.spor)gv.spor={};gv.spor.seviye=gv.spor.seviye===s?null:s;gvCiz();gvKayitGec();}
 function gvSporS(v){if(!gv.spor)gv.spor={};gv.spor.sure=v===''?null:parseInt(v);gvKayitGec();}
